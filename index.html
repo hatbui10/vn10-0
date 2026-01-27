@@ -92,48 +92,55 @@ button:hover {
 
 /* LỊCH SỬ */
 #history {
-    margin: 26px;
-}
-
-.block {
-    background: rgba(255,255,255,0.08);
+    background: #f0f4f8;
+    border: 1px solid #cbd5e1;
     border-radius: 10px;
-    padding: 10px 14px;
-    margin-top: 10px;
-    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.1);
-    animation: fadeIn 0.25s ease;
+    padding: 12px;
+    max-height: 320px;
+    overflow-y: auto;
 }
 
-/* ANIMATION NHẸ */
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(6px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+/* mỗi Axyz */
+.block {
+    background: #ffffff;
+    border-left: 5px solid #64748b;
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
 }
 
+/* tiêu đề Axyz */
+.block b {
+    color: #1e293b;
+    font-size: 15px;
+}
 
+/* dòng Y cũ */
+.block i {
+    color: #475569;
+    font-size: 13px;
+}
+
+/* hàng Y 5 ô */
 .y-row {
     display: grid;
-    grid-template-columns: repeat(5, 24px);
+    grid-template-columns: repeat(5, 26px);
     gap: 4px;
-    margin: 4px 0;
+    margin-top: 4px;
 }
 
 .y-cell {
-    width: 24px;
-    height: 24px;
-    border: 1px solid #999;
-    background: #e8f3ff;
+    width: 26px;
+    height: 26px;
+    background: #e0f2fe;
+    border: 1px solid #7dd3fc;
+    border-radius: 4px;
     text-align: center;
-    line-height: 24px;
-    font-size: 14px;
+    line-height: 26px;
+    font-weight: bold;
+    color: #0369a1;
 }
-
 
 </style>
 </head>
