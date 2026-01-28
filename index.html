@@ -321,10 +321,24 @@ if (idx > 0) {
     inputs[50].focus();
 }
 
+
+
+function noSameBit(a, b) {
+    for (let i = 0; i < 5; i++) {
+        if (a[i] === b[i]) return false;
+    }
+    return true;
+}
+
+
+
+
 function calculateLong() {
     history.length = 0;
     historyDiv.innerHTML = "";
-
+    let countNoOverlap = 0; // ✅ THÊM
+    
+    
     const B = document.getElementById("longB").value
     .replace(/[^01]/g, "");
 
@@ -353,24 +367,35 @@ function calculateLong() {
 
         history.push({ A, X, Y, Z });
         const idx = history.length - 1;
+        let isValid = false; // ✅ THÊM
 
         let extraHtml = "";
         if (idx > 0) {
-            const prevY = history[idx - 1].Y;
-            extraHtml = `
-                <div>
-                    <i>Y (Axyz${idx})</i>
-                    <div class="y-row">
-                        ${prevY.split("").map(b => `
-                            <div class="y-cell">${b}</div>
-                        `).join("")}
-                    </div>
-                </div>
-            `;
-        }
+    const prevY = history[idx - 1].Y;
+
+    if (noSameBit(X, prevY)) {
+        countNoOverlap++;
+        isValid = true;
+    }
+
+    extraHtml = `
+        <div>
+            <i>Y (Axyz${idx})</i>
+            <div class="y-row">
+                ${prevY.split("").map(b => `
+                    <div class="y-cell">${b}</div>
+                `).join("")}
+            </div>
+        </div>
+    `;
+}
 
         const div = document.createElement("div");
         div.className = "block";
+        if (isValid) {
+    div.style.borderLeft = "5px solid #22c55e";
+}
+
         div.innerHTML = `
             <b>Axyz${idx + 1}</b><br>
             A: ${A}<br>
@@ -400,7 +425,18 @@ function calculateLong() {
 
         historyDiv.prepend(div);
     }
+     const stat = document.createElement("div");
+    stat.className = "block";
+    stat.innerHTML = `
+        <b>📊 Thống kê</b><br>
+        Số khối có X và Y(Axyz) không trùng bit: <b>${countNoOverlap}</b>
+    `;
+
+    historyDiv.prepend(stat);
 }
+
+
+
 
 
 </script>
