@@ -59,7 +59,7 @@ input:focus {
 
 /* MÀU A X Y */
 .A {
-    background: linear-gradient(135deg, #ff7aa2, #ffd6e7);
+    background: linear-gradient(135deg, #ff7aa2, yellow);
     color: #000;
 }
 .X {
@@ -273,9 +273,10 @@ if (idx > 0) {
             <b>Axyz${idx + 1}</b><br>
             A: ${A}<br>
             X: ${X}<br>
+            {extraHtml}
             Y: ${Y}<br>
             Z: ${Z}<br>
-            ${extraHtml}
+            $
         `;
 
         historyDiv.prepend(div);
@@ -286,4 +287,5 @@ if (idx > 0) {
 </script>
 </body>
 </html>
+
 
