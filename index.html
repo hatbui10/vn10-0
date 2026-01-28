@@ -63,8 +63,19 @@ input:focus {
     color: #000;
 }
 .X {
-    background: linear-gradient(135deg, #74c0fc, #dbe9ff);
-    color: #000;
+    width: 40px;
+    height: 40px;
+    background: red;
+    border: 1px solid #7dd3fc;
+    border-radius: 4px;
+    margin: 4px;
+    display: flex;
+    align-items: center;      /* căn dọc */
+    justify-content: center;  /* căn ngang */
+    font-size: 20px;
+    font-weight: bold;
+    color: #fff;
+
 }
 .Y {
     background: linear-gradient(135deg, #63e6be, #d6f5e3);
@@ -160,7 +171,7 @@ button:hover {
 <textarea id="longB" rows="4" style="width:100%;font-family:monospace"
 placeholder="Dán chuỗi 0–1 dài ở đây (1000 bit cũng được)"></textarea>
 <button onclick="calculateLong()">Quét chuỗi</button>
-
+ 
     <button onclick="calculate()">Tính</button>
 
     <h3>Lịch sử Axyz</h3>
@@ -280,7 +291,24 @@ if (idx > 0) {
         div.innerHTML = `
             <b>Axyz${idx + 1}</b><br>
             A: ${A}<br>
-            X: ${X}<br>
+            
+            
+            
+            <div>
+    <i>X</i>
+    <div class="y-row">
+        ${X.split("").map(b => `
+            <div class="y-cell">${b}</div>
+        `).join("")}
+    </div>
+</div>
+
+            
+            
+            
+            
+            
+            
             ${extraHtml}
             Y: ${Y}<br>
             Z: ${Z}<br>
@@ -346,7 +374,25 @@ function calculateLong() {
         div.innerHTML = `
             <b>Axyz${idx + 1}</b><br>
             A: ${A}<br>
-            X: ${X}<br>
+            
+            
+            
+            
+            
+              
+            <div>
+    <i>X</i>
+    <div class="y-row">
+        ${X.split("").map(b => `
+            <div class="y-cell">${b}</div>
+        `).join("")}
+    </div>
+</div>
+
+
+
+
+
             ${extraHtml}
             Y: ${Y}<br>
             Z: ${Z}<br>
