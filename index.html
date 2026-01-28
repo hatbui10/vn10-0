@@ -156,6 +156,10 @@ button:hover {
 
     <h3>Dãy B (51 bit)</h3>
     <div class="inputs" id="inputs"></div>
+    <h3>Dãy B (chuỗi dài)</h3>
+<textarea id="longB" rows="4" style="width:100%;font-family:monospace"
+placeholder="Dán chuỗi 0–1 dài ở đây (1000 bit cũng được)"></textarea>
+<button onclick="calculateLong()">Quét chuỗi</button>
 
     <button onclick="calculate()">Tính</button>
 
@@ -288,6 +292,71 @@ if (idx > 0) {
 
     inputs[50].focus();
 }
+
+function calculateLong() {
+    history.length = 0;
+    historyDiv.innerHTML = "";
+
+    const B = document.getElementById("longB").value
+    .replace(/[^01]/g, "");
+
+    if (!/^[01]+$/.test(B)) return;
+    if (!/0{4,}1/.test(B)) {
+    alert("Chuỗi không chứa mẫu Axyz (00001...)");
+    return;
+}
+
+
+    const regex = /0{4,}1/g;
+    let match;
+
+    while ((match = regex.exec(B)) !== null) {
+        const startA = match.index;
+        const lenA   = match[0].length;
+        const startX = startA + lenA;
+        const startY = startX + 5;
+
+        if (startY + 5 > B.length) break;
+
+        const A = match[0];
+        const X = B.slice(startX, startX + 5);
+        const Y = B.slice(startY, startY + 5);
+        const Z = B.slice(startY + 5);
+
+        history.push({ A, X, Y, Z });
+        const idx = history.length - 1;
+
+        let extraHtml = "";
+        if (idx > 0) {
+            const prevY = history[idx - 1].Y;
+            extraHtml = `
+                <div>
+                    <i>Y (Axyz${idx})</i>
+                    <div class="y-row">
+                        ${prevY.split("").map(b => `
+                            <div class="y-cell">${b}</div>
+                        `).join("")}
+                    </div>
+                </div>
+            `;
+        }
+
+        const div = document.createElement("div");
+        div.className = "block";
+        div.innerHTML = `
+            <b>Axyz${idx + 1}</b><br>
+            A: ${A}<br>
+            X: ${X}<br>
+            ${extraHtml}
+            Y: ${Y}<br>
+            Z: ${Z}<br>
+        `;
+
+        historyDiv.prepend(div);
+    }
+}
+
+
 </script>
 </body>
 </html>
