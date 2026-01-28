@@ -119,13 +119,13 @@ button:hover {
 /* dòng Y cũ */
 .block i {
     color: #475569;
-    font-size: 20px;
+    font-size: 13px;
 }
 
 /* hàng Y 5 ô */
 .y-row {
     display: grid;
-    grid-template-columns: repeat(5, 26px);
+    grid-template-columns: repeat(5, 40px);
     gap: 4px;
     margin-top: 4px;
 }
@@ -136,11 +136,15 @@ button:hover {
     background: red;
     border: 1px solid #7dd3fc;
     border-radius: 4px;
-    text-align: center;
-    line-height: 26px;
+    margin: 4px;
+    display: flex;
+    align-items: center;      /* căn dọc */
+    justify-content: center;  /* căn ngang */
+    font-size: 20px;
     font-weight: bold;
     color: #fff;
 }
+
 
 </style>
 </head>
@@ -287,6 +291,8 @@ if (idx > 0) {
 </script>
 </body>
 </html>
+
+
 
 
 
