@@ -208,7 +208,7 @@ input6.addEventListener("input", () => {
     // chỉ chấp nhận từ pos = 2 trở đi
     if (candidatePos >= 2) {
       pos = candidatePos;
-      usePos = stt + pos;
+      usePos = stt - pos+1;
     } else {
       pos = 0;
       usePos = 0;
@@ -249,6 +249,7 @@ window.onload = () => input6.focus();
 </script>
 </body>
 </html>
+
 
 
 
