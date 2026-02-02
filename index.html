@@ -135,7 +135,7 @@ function renderHistory() {
 
   history.forEach(item => {
     const note = item.usePos > 0
-      ? ` → dùng ${item.pattern} tại vị trí số ${item.usePos}`
+      ? ` → dùng dãy 5 bit tại vị trí số ${item.usePos}`
       : " → chưa trùng";
 
     const li = document.createElement("li");
@@ -249,6 +249,7 @@ window.onload = () => input6.focus();
 </script>
 </body>
 </html>
+
 
 
 
