@@ -1,448 +1,254 @@
+
 <!DOCTYPE html>
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<title>Máy quét Axyz</title>
-
+<title>Binary Batch Checker</title>
 <style>
-    body {
-    font-family: monospace;
-    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-    padding: 30px;
-    color: #eaeaea;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
-
-/* KHUNG CHÍNH */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  color: #333;
+}
 .container {
-    max-width: 760px;
-    margin: auto;
-    background: rgba(255,255,255,0.06);
-    border-radius: 14px;
-    padding: 20px 24px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-    backdrop-filter: blur(6px);
+  background: rgba(255,255,255,0.95);
+  border-radius: 20px;
+  padding: 40px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  max-width: 600px;
+  width: 100%;
 }
-
-/* TIÊU ĐỀ */
-h3 {
-    margin-top: 0;
-    margin-bottom: 12px;
-    letter-spacing: 1px;
+h3, h4 {
+  text-align: center;
+  color: #4a5568;
+  margin-bottom: 20px;
 }
-
-/* INPUT BIT */
-.inputs {
-    display: grid;
-    grid-template-columns: repeat(17, 34px);
-    gap: 6px;
-    margin-bottom: 16px;
+.row {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-bottom: 25px;
 }
-
 input {
-    width: 32px;
-    height: 32px;
-    text-align: center;
-    font-size: 16px;
-    border-radius: 6px;
-    border: 1px solid rgba(255,255,255,0.2);
-    background: rgba(0,0,0,0.4);
-    color: #fff;
-    outline: none;
-    transition: all 0.15s ease;
+  width: 60px;
+  height: 60px;
+  text-align: center;
+  font-size: 24px;
+  font-weight: bold;
+  border: 3px solid #e2e8f0;
+  border-radius: 15px;
+  background: #f7fafc;
 }
-
 input:focus {
-    border-color: #4dabf7;
-    box-shadow: 0 0 0 2px rgba(77,171,247,0.35);
-    background: rgba(0,0,0,0.6);
+  outline: none;
+  border-color: #667eea;
 }
-
-/* MÀU A X Y */
-.A {
-    background: linear-gradient(135deg, #ff7aa2, yellow);
-    color: #000;
+input:disabled {
+  background: #edf2f7;
+  color: #94a3b8;
 }
-.X {
-    width: 40px;
-    height: 40px;
-    background: red;
-    border: 1px solid #7dd3fc;
-    border-radius: 4px;
-    margin: 4px;
-    display: flex;
-    align-items: center;      /* căn dọc */
-    justify-content: center;  /* căn ngang */
-    font-size: 20px;
-    font-weight: bold;
-    color: #fff;
-
+input.mark {
+  background: #ffc107;
+  border-color: #ffb300;
 }
-.Y {
-    background: linear-gradient(135deg, #63e6be, #d6f5e3);
-    color: #000;
+.result-section {
+  text-align: center;
+  padding: 15px;
+  background: #f8fafc;
+  border-radius: 15px;
+  margin-bottom: 25px;
 }
-
-/* NÚT */
-button {
-    margin: 8px;
-    padding: 8px 22px;
-    font-size: 14px;
-    border-radius: 20px;
-    border: none;
-    cursor: pointer;
-    color: #fff;
-    background: linear-gradient(135deg, #845ef7, #5c7cfa);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.35);
-    transition: all 0.2s ease;
+#result {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #667eea;
 }
-
-button:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 12px 26px rgba(0,0,0,0.45);
+#historyView {
+  list-style: none;
+  max-height: 300px;
+  overflow-y: auto;
 }
-
-/* LỊCH SỬ */
-#history {
-    background: #f0f4f8;
-    border: 1px solid #cbd5e1;
-    border-radius: 10px;
-    padding: 12px;
-    max-height: 320px;
-    overflow-y: auto;
+#historyView li {
+  padding: 10px 14px;
+  margin-bottom: 8px;
+  background: #f7fafc;
+  border-radius: 10px;
+  border-left: 4px solid #667eea;
 }
-
-/* mỗi Axyz */
-.block {
-    background: #ffffff;
-    border-left: 5px solid #64748b;
-    border-radius: 8px;
-    padding: 10px;
-    margin-bottom: 10px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-}
-
-/* tiêu đề Axyz */
-.block b {
-    color: #1e293b;
-    font-size: 15px;
-}
-
-/* dòng Y cũ */
-.block i {
-    color: #475569;
-    font-size: 13px;
-}
-
-/* hàng Y 5 ô */
-.y-row {
-    display: grid;
-    grid-template-columns: repeat(5, 40px);
-    gap: 4px;
-    margin-top: 4px;
-}
-
-.y-cell {
-    width: 40px;
-    height: 40px;
-    background: red;
-    border: 1px solid #7dd3fc;
-    border-radius: 4px;
-    margin: 4px;
-    display: flex;
-    align-items: center;      /* căn dọc */
-    justify-content: center;  /* căn ngang */
-    font-size: 20px;
-    font-weight: bold;
-    color: #fff;
-}
-
-
 </style>
 </head>
-
 <body>
-
-
 <div class="container">
-
-    <h3>Dãy B (51 bit)</h3>
-    <div class="inputs" id="inputs"></div>
-    <h3>Dãy B (chuỗi dài)</h3>
-<textarea id="longB" rows="4" style="width:100%;font-family:monospace"
-placeholder="Dán chuỗi 0–1 dài ở đây (1000 bit cũng được)"></textarea>
-<button onclick="calculateLong()">Quét chuỗi</button>
- 
-    <button onclick="calculate()">Tính</button>
-
-    <h3>Lịch sử Axyz</h3>
-    <div id="history"></div>
-
+  <h3>Nhập 0 / 1 tại ô cuối (đủ 5 sẽ tự kiểm tra & reset)</h3>
+  <div class="row" id="cells">
+    <input disabled>
+    <input disabled>
+    <input disabled>
+    <input disabled>
+    <input disabled>
+    <input
+      id="input6"
+      type="tel"
+      inputmode="numeric"
+      pattern="[01]"
+      maxlength="1"
+    >
+  </div>
+  <div class="result-section">
+    <p>Kết quả so trùng (0 = không trùng trong 10 lần):</p>
+    <div id="result">-</div>
+  </div>
+  <h4>Lịch sử (tối đa 32 dãy)</h4>
+  <ul id="historyView"></ul>
 </div>
+
+
+
+
 
 
 <script>
-const inputsDiv = document.getElementById("inputs");
-const historyDiv = document.getElementById("history");
-const inputs = [];
-const history = [];
+const inputs = document.querySelectorAll("#cells input");
+const input6 = document.getElementById("input6");
+const result = document.getElementById("result");
+const historyView = document.getElementById("historyView");
 
-/* ===== TẠO 51 Ô ===== */
-for (let i = 0; i < 51; i++) {
-    const inp = document.createElement("input");
-    inp.maxLength = 1;
+let buffer = [];
+let history = [];
+let serialCounter = 0;
 
-    inp.addEventListener("input", () => {
-        if (!/^[01]$/.test(inp.value)) {
-            inp.value = "";
-            return;
-        }
+/* =========================
+   RENDER HISTORY (CHỈ HIỂN THỊ)
+========================= */
+function renderHistory() {
+  historyView.innerHTML = "";
 
-        if (i < 50) {
-            inputs[i + 1].focus();
-        } else {
-            shiftLeft();
-            inputs[50].focus();
-        }
+  history.forEach(item => {
+    const note = item.usePos > 0
+      ? ` → dùng ${item.pattern} tại vị trí số ${item.usePos}`
+      : " → chưa trùng";
+
+    const li = document.createElement("li");
+    li.innerHTML = `
+      <strong>#${item.serialNumber}</strong>
+      ${item.pattern}
+      | pos=${item.pos}
+      ${note}
+    `;
+    historyView.appendChild(li);
+  });
+}
+
+/* =========================
+   RESET INPUT
+========================= */
+function resetCells() {
+  buffer = [];
+  for (let i = 0; i < 5; i++) {
+    inputs[i].value = "";
+    inputs[i].classList.remove("mark");
+  }
+  input6.disabled = false;
+  input6.focus();
+}
+
+/* =========================
+  /* =========================
+   INPUT LOGIC
+========================= */
+input6.addEventListener("input", () => {
+  const val = input6.value;
+  input6.value = "";
+
+  if (!/^[01]$/.test(val)) return;
+  if (buffer.length >= 5) return;
+
+  buffer.push(val);
+  inputs[buffer.length - 1].value = val;
+
+  if (buffer.length === 5) {
+    input6.disabled = true;
+
+    const pattern = buffer.join("");
+
+    serialCounter++;
+    const stt = serialCounter;
+
+    let pos = 0;
+    let usePos = 0;
+
+    // tìm prev hợp lệ (lọc luôn case cần bỏ)
+    const prev = history.find(h => {
+      if (h.pattern !== pattern) return false;
+
+      const isAdjacent = h.serialNumber === stt - 1;
+
+      // nếu STT liền trước + pos = 0 → KHÔNG cho sinh pos = 1
+      if (isAdjacent && h.pos === 0) {
+        return false;
+      }
+
+      return true;
     });
 
-    inputs.push(inp);
-    inputsDiv.appendChild(inp);
-}
+   if (prev) {
+  if (prev.pos === 0) {
+    const candidatePos = history.indexOf(prev) + 1;
 
-window.onload = () => inputs[0].focus();
-
-/* ===== DỊCH TRÁI ===== */
-function shiftLeft() {
-    clearColors();
-    for (let i = 0; i < 50; i++) {
-        inputs[i].value = inputs[i + 1].value;
+    // chỉ chấp nhận từ pos = 2 trở đi
+    if (candidatePos >= 2) {
+      pos = candidatePos;
+      usePos = stt + pos;
+    } else {
+      pos = 0;
+      usePos = 0;
     }
-    inputs[50].value = "";
+  } else {
+    // các lần sau dùng lại pos đã chốt
+    pos = prev.pos;
+    usePos = stt + pos;
+  }
 }
 
-/* ===== LẤY B ===== */
-function getB() {
-    return inputs.map(i => i.value || "0").join("");
-}
+    history.unshift({
+      serialNumber: stt,
+      pattern,
+      pos,
+      usePos
+    });
 
-/* ===== MÀU ===== */
-function clearColors() {
-    inputs.forEach(i => i.classList.remove("A","X","Y"));
-}
+    result.textContent = pos;
 
-function colorRange(start, length, cls) {
-    for (let i = start; i < start + length && i < 51; i++) {
-        inputs[i].classList.add(cls);
-    }
-}
-
-/* ===== TÍNH TOÀN BỘ Axyz ===== */
-function calculate() {
-    clearColors();
-
-    const B = getB();
-    const regex = /0{4,}1/g;
-    let match;
-
-    while ((match = regex.exec(B)) !== null) {
-
-        const startA = match.index;
-        const lenA   = match[0].length;
-        const startX = startA + lenA;
-        const startY = startX + 5;
-
-        if (startY + 5 > B.length) break;
-
-        const A = match[0];
-        const X = B.slice(startX, startX + 5);
-        const Y = B.slice(startY, startY + 5);
-        const Z = B.slice(startY + 5);
-
-        /* ===== TÔ MÀU ===== */
-        colorRange(startA, lenA, "A");
-        colorRange(startX, 5, "X");
-        colorRange(startY, 5, "Y");
-
-        /* ===== LƯU ===== */
-        history.push({ A, X, Y, Z });
-        const idx = history.length - 1;
-
-        /* ===== Y CŨ (TỐI ĐA 5) ===== */
-        let extraHtml = "";
-
-if (idx > 0) {
-    const prevY = history[idx - 1].Y;
-
-    extraHtml = `
-        <div>
-            <i>Y (Axyz${idx})</i>
-            <div class="y-row">
-                ${prevY.split("").map(b => `
-                    <div class="y-cell">${b}</div>
-                `).join("")}
-            </div>
-        </div>
-    `;
-}
-
-        /* ===== BLOCK ===== */
-        const div = document.createElement("div");
-        div.className = "block";
-        div.innerHTML = `
-            <b>Axyz${idx + 1}</b><br>
-            A: ${A}<br>
-            
-            
-            
-            <div>
-    <i>X</i>
-    <div class="y-row">
-        ${X.split("").map(b => `
-            <div class="y-cell">${b}</div>
-        `).join("")}
-    </div>
-</div>
-
-            
-            
-            
-            
-            
-            
-            ${extraHtml}
-            Y: ${Y}<br>
-            Z: ${Z}<br>
-            
-        `;
-
-        historyDiv.prepend(div);
+    if (pos >= 2) {
+      for (let i = 0; i < 5; i++) {
+        inputs[i].classList.add("mark");
+      }
     }
 
-    inputs[50].focus();
-}
+    if (history.length > 250) history.pop();
 
-
-
-function noSameBit(a, b) {
-    for (let i = 0; i < 5; i++) {
-        if (a[i] === b[i]) return false;
-    }
-    return true;
-}
+    renderHistory();
+    setTimeout(resetCells, 350);
+  }
+});
 
 
 
 
-function calculateLong() {
-    history.length = 0;
-    historyDiv.innerHTML = "";
-    let countNoOverlap = 0; // ✅ THÊM
-    
-    
-    const B = document.getElementById("longB").value
-    .replace(/[^01]/g, "");
-
-    if (!/^[01]+$/.test(B)) return;
-    if (!/0{4,}1/.test(B)) {
-    alert("Chuỗi không chứa mẫu Axyz (00001...)");
-    return;
-}
-
-
-    const regex = /0{4,}1/g;
-    let match;
-
-    while ((match = regex.exec(B)) !== null) {
-        const startA = match.index;
-        const lenA   = match[0].length;
-        const startX = startA + lenA;
-        const startY = startX + 5;
-
-        if (startY + 5 > B.length) break;
-
-        const A = match[0];
-        const X = B.slice(startX, startX + 5);
-        const Y = B.slice(startY, startY + 5);
-        const Z = B.slice(startY + 5);
-
-        history.push({ A, X, Y, Z });
-        const idx = history.length - 1;
-        let isValid = false; // ✅ THÊM
-
-        let extraHtml = "";
-        if (idx > 0) {
-    const prevY = history[idx - 1].Y;
-
-    if (noSameBit(X, prevY)) {
-        countNoOverlap++;
-        isValid = true;
-    }
-
-    extraHtml = `
-        <div>
-            <i>Y (Axyz${idx})</i>
-            <div class="y-row">
-                ${prevY.split("").map(b => `
-                    <div class="y-cell">${b}</div>
-                `).join("")}
-            </div>
-        </div>
-    `;
-}
-
-        const div = document.createElement("div");
-        div.className = "block";
-        if (isValid) {
-    div.style.borderLeft = "5px solid #22c55e";
-}
-
-        div.innerHTML = `
-            <b>Axyz${idx + 1}</b><br>
-            A: ${A}<br>
-            
-            
-            
-            
-            
-              
-            <div>
-    <i>X</i>
-    <div class="y-row">
-        ${X.split("").map(b => `
-            <div class="y-cell">${b}</div>
-        `).join("")}
-    </div>
-</div>
-
-
-
-
-
-            ${extraHtml}
-            Y: ${Y}<br>
-            Z: ${Z}<br>
-        `;
-
-        historyDiv.prepend(div);
-    }
-     const stat = document.createElement("div");
-    stat.className = "block";
-    stat.innerHTML = `
-        <b>📊 Thống kê</b><br>
-        Số khối có X và Y(Axyz) không trùng bit: <b>${countNoOverlap}</b>
-    `;
-
-    historyDiv.prepend(stat);
-}
-
-
-
-
-
+window.onload = () => input6.focus();
 </script>
 </body>
 </html>
-
 
 
 
