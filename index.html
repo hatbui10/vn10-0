@@ -1,262 +1,129 @@
-
 <!DOCTYPE html>
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<title>Binary Batch Checker</title>
+<title>STT & 0-1</title>
+
 <style>
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  min-height: 100vh;
-  padding: 20px;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  color: #333;
+    font-family: Consolas, monospace;
+    background: #0f172a;
+    padding: 30px;
+    color: #e5e7eb;
 }
-.container {
-  background: rgba(255,255,255,0.95);
-  border-radius: 20px;
-  padding: 40px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-  max-width: 600px;
-  width: 100%;
-}
-h3, h4 {
-  text-align: center;
-  color: #4a5568;
-  margin-bottom: 20px;
-}
+
 .row {
-  display: flex;
-  gap: 12px;
-  justify-content: center;
-  margin-bottom: 25px;
+    display: grid;
+    grid-template-columns: repeat(25, 48px);
+    gap: 6px;
+    margin-bottom: 12px;
 }
+
 input {
-  width: 60px;
-  height: 60px;
-  text-align: center;
-  font-size: 24px;
-  font-weight: bold;
-  border: 3px solid #e2e8f0;
-  border-radius: 15px;
-  background: #f7fafc;
+    width: 48px;
+    height: 40px;
+    text-align: center;
+    font-size: 16px;
+    border-radius: 6px;
+    border: none;
+    outline: none;
+    box-sizing: border-box;
 }
-input:focus {
-  outline: none;
-  border-color: #667eea;
+
+.stt input {
+    background: #1e293b;
+    color: #38bdf8;
+    font-weight: bold;
 }
+
+.val input {
+    background: #020617;
+    color: #facc15;
+}
+
 input:disabled {
-  background: #edf2f7;
-  color: #94a3b8;
-}
-input.mark {
-  background: #ffc107;
-  border-color: #ffb300;
-}
-.result-section {
-  text-align: center;
-  padding: 15px;
-  background: #f8fafc;
-  border-radius: 15px;
-  margin-bottom: 25px;
-}
-#result {
-  font-size: 2rem;
-  font-weight: bold;
-  color: #667eea;
-}
-#historyView {
-  list-style: none;
-  max-height: 300px;
-  overflow-y: auto;
-}
-#historyView li {
-  padding: 10px 14px;
-  margin-bottom: 8px;
-  background: #f7fafc;
-  border-radius: 10px;
-  border-left: 4px solid #667eea;
+    opacity: 0.6;
 }
 </style>
 </head>
 <body>
-<div class="container">
-  <h3>Nhập 0 / 1 tại ô cuối (đủ 5 sẽ tự kiểm tra & reset)</h3>
-  <div class="row" id="cells">
-    <input disabled>
-    <input disabled>
-    <input disabled>
-    <input disabled>
-    <input disabled>
-    <input
-      id="input6"
-      type="tel"
-      inputmode="numeric"
-      pattern="[01]"
-      maxlength="1"
-    >
-  </div>
-  <div class="result-section">
-    <p>Kết quả so trùng (0 = không trùng trong 10 lần):</p>
-    <div id="result">-</div>
-  </div>
-  <h4>Tlrrldtb Tcbcqtn Tlmttgbt Ltg 9420,./</h4>
-   <h4>Banhung2011,./Hbth 0869813870@piZKEFBLNNGfPF3pKk-b1A</h4>
-   <h4>Tlrrldtb Tcbcqtn Tlmttgbt Ltg 9420,./</h4>
-  <ul id="historyView"></ul>
-</div>
 
-
-
-
-
+<div class="row stt" id="sttRow"></div>
+<div class="row val" id="valRow"></div>
 
 <script>
-const inputs = document.querySelectorAll("#cells input");
-const input6 = document.getElementById("input6");
-const result = document.getElementById("result");
-const historyView = document.getElementById("historyView");
+const COLS = 25;
+const sttInputs = [];
+const valInputs = [];
+let valCount = 0;
 
-let buffer = [];
-let history = [];
-let serialCounter = 0;
+/* Tạo ô */
+for (let i = 0; i < COLS; i++) {
+    const s = document.createElement("input");
+    s.maxLength = 3;
+    s.disabled = i !== COLS - 1;
+    document.getElementById("sttRow").appendChild(s);
+    sttInputs.push(s);
 
-/* =========================
-   RENDER HISTORY (CHỈ HIỂN THỊ)
-========================= */
-function renderHistory() {
-  historyView.innerHTML = "";
-
-  history.forEach(item => {
-    const note = item.usePos > 0
-      ? ` → dùng dãy 5 bit tại vị trí số ${item.usePos}`
-      : " → chưa trùng";
-
-    const li = document.createElement("li");
-    li.innerHTML = `
-      <strong>#${item.serialNumber}     </strong>        
-      ${item.pattern}
-      | pos=${item.pos}
-      ${note}
-    `;
-    historyView.appendChild(li);
-  });
+    const v = document.createElement("input");
+    v.maxLength = 1;
+    v.disabled = i !== COLS - 1;
+    document.getElementById("valRow").appendChild(v);
+    valInputs.push(v);
 }
 
-/* =========================
-   RESET INPUT
-========================= */
-function resetCells() {
-  buffer = [];
-  for (let i = 0; i < 5; i++) {
-    inputs[i].value = "";
-    inputs[i].classList.remove("mark");
-  }
-  input6.disabled = false;
-  input6.focus();
-}
+/* Focus ban đầu */
+sttInputs[24].focus();
 
-/* =========================
-  /* =========================
-   INPUT LOGIC
-========================= */
-input6.addEventListener("input", () => {
-  const val = input6.value;
-  input6.value = "";
+/* ===== STT ===== */
+sttInputs[24].addEventListener("input", e => {
+    e.target.value = e.target.value.replace(/\D/g, "");
 
-  if (!/^[01]$/.test(val)) return;
-  if (buffer.length >= 5) return;
+    if (e.target.value.length === 3) {
+        const base = parseInt(e.target.value, 10);
 
-  buffer.push(val);
-  inputs[buffer.length - 1].value = val;
+        // ô 1 = base → ô 24 = base + 23
+        for (let i = 0; i < 24; i++) {
+            sttInputs[i].value = base + i;
+        }
 
-  if (buffer.length === 5) {
-    input6.disabled = true;
+        sttInputs[24].value = "";
 
-    const pattern = buffer.join("");
-
-    serialCounter++;
-    const stt = serialCounter;
-
-    let pos = 0;
-    let usePos = 0;
-
-    // tìm prev hợp lệ (lọc luôn case cần bỏ)
-    const prev = history.find(h => {
-      if (h.pattern !== pattern) return false;
-
-      const isAdjacent = h.serialNumber === stt - 1;
-
-      // nếu STT liền trước + pos = 0 → KHÔNG cho sinh pos = 1
-      if (isAdjacent && h.pos === 0) {
-        return false;
-      }
-
-      return true;
-    });
-
-   if (prev) {
-  if (prev.pos === 0) {
-    const candidatePos = history.indexOf(prev) + 1;
-
-    // chỉ chấp nhận từ pos = 2 trở đi
-    if (candidatePos >= 2) {
-      pos = candidatePos;
-      usePos = stt - pos+1;
-    } else {
-      pos = 0;
-      usePos = 0;
+        setTimeout(() => {
+            valInputs[24].focus();
+        }, 1000);
     }
-  } else {
-    // các lần sau dùng lại pos đã chốt
-    pos = prev.pos;
-    usePos = stt + pos;
-  }
-}
-
-    history.unshift({
-      serialNumber: stt,
-      pattern,
-      pos,
-      usePos
-    });
-
-    result.textContent = pos;
-
-    if (pos >= 2) {
-      for (let i = 0; i < 5; i++) {
-        inputs[i].classList.add("mark");
-      }
-    }
-
-    if (history.length > 250) history.pop();
-
-    renderHistory();
-    setTimeout(resetCells, 350);
-  }
 });
 
+/* ===== 0–1 ===== */
+valInputs[24].addEventListener("input", e => {
+    if (!["0", "1"].includes(e.target.value)) {
+        e.target.value = "";
+        return;
+    }
 
+    // dịch trái hàng dưới
+    for (let i = 0; i < 24; i++) {
+        valInputs[i].value = valInputs[i + 1].value;
+    }
+    valInputs[24].value = e.target.value;
+    e.target.value = "";
 
+    valCount++;
 
-window.onload = () => input6.focus();
+    // đủ 25 lần → STT dịch theo
+    if (valCount >= 25) {
+        for (let i = 0; i < 23; i++) {
+            sttInputs[i].value = sttInputs[i + 1].value;
+        }
+        sttInputs[23].value =
+            parseInt(sttInputs[22].value) + 1;
+    }
+
+    valInputs[24].focus();
+});
 </script>
+
 </body>
 </html>
-
-
-
-
-
-
-
-
 
