@@ -44,12 +44,22 @@ input {
 input:disabled {
     opacity: 0.6;
 }
+
+.sum {
+    margin-top: 10px;
+    font-size: 18px;
+    color: #a5f3fc;
+}
 </style>
 </head>
 <body>
 
 <div class="row stt" id="sttRow"></div>
 <div class="row val" id="valRow"></div>
+
+<div class="sum">
+    Tổng: <span id="sum">0</span>
+</div>
 
 <script>
 const COLS = 25;
@@ -111,6 +121,8 @@ valInputs[24].addEventListener("input", e => {
 
     valCount++;
 
+    updateSum(); // 👈 TÍNH TỔNG
+
     // đủ 25 lần → STT dịch theo
     if (valCount >= 25) {
         for (let i = 0; i < 23; i++) {
@@ -118,10 +130,21 @@ valInputs[24].addEventListener("input", e => {
         }
         sttInputs[23].value =
             parseInt(sttInputs[22].value) + 1;
+
+        valCount = 0;
     }
 
     valInputs[24].focus();
 });
+
+/* ===== TÍNH TỔNG 25 Ô 0–1 ===== */
+function updateSum() {
+    let sum = 0;
+    for (let i = 0; i < COLS; i++) {
+        if (valInputs[i].value === "1") sum++;
+    }
+    document.getElementById("sum").textContent = sum;
+}
 </script>
 
 </body>
