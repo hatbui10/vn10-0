@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<title>Kiểm tra 4 bit liên tiếp</title>
+<title>Bit Rule Engine IPFS</title>
 <style>
 body{
     background:#1e1e2f;
@@ -24,14 +24,15 @@ body{
 </head>
 <body>
 
-<h2>Kiểm tra 4 bit liên tiếp khác nhau</h2>
+<h2>Bit Rule Engine (IPFS Auto Load)</h2>
 
-<input type="file" id="fileInput" accept=".txt">
-<button onclick="processFile()">Xử lý</button>
+<button onclick="loadFromIPFS()">Tải lại</button>
 
-<div id="output"></div>
+<div id="output">Đang tải dữ liệu...</div>
 
 <script>
+
+const ipfsURL = "https://tomato-delicate-zebra-533.mypinata.cloud/ipfs/bafybeianxazt5mo6hclvc7kvxbkizn634a762gnt3giewin5fmdhaim2zm";
 
 const ruleMap = {
     "1": [2,3,5],
@@ -52,7 +53,7 @@ const ruleMap = {
     "4-5": [2,5],
 
     "1-2-3": [3,5],
-    "1-2-4": [3,5],
+    "1-2-4": [3],
     "1-2-5": [2,4],
     "1-3-5": [2,4],
     "1-3-4": [2,5],
@@ -60,7 +61,7 @@ const ruleMap = {
     "2-4-5": [2,4,5],
     "2-3-4": [1,5],
     "2-3-5": [1,4],
-    "3-4-5": [1,2],
+    "3-4-5": [1,5],
 
     "1-2-3-4": [3],
     "1-2-3-5": [2,5],
@@ -70,7 +71,6 @@ const ruleMap = {
 
     "1-2-3-4-5": [3,5],
     "": [2,5]
-
 };
 
 function flip(bit){
@@ -82,18 +82,18 @@ function applyRule(base, test){
     let baseBits = base.split("");
     let testBits = test.split("");
 
-    let diffPositions = [];
+    let matchPositions = [];
 
     for(let i=0;i<5;i++){
-        if(baseBits[i] !== testBits[i]){
-            diffPositions.push(i+1);
+        if(baseBits[i] === testBits[i]){
+            matchPositions.push(i+1);
         }
     }
 
-    let key = diffPositions.sort((a,b)=>a-b).join("-");
+    let matchKey = matchPositions.join("-");
 
-    if(ruleMap[key]){
-        ruleMap[key].forEach(pos=>{
+    if(ruleMap.hasOwnProperty(matchKey)){
+        ruleMap[matchKey].forEach(pos=>{
             testBits[pos-1] = flip(testBits[pos-1]);
         });
     }
@@ -120,66 +120,70 @@ function has4ConsecutiveDiff(a, b){
     return false;
 }
 
-function processFile(){
+function processText(text){
 
-    const file = document.getElementById("fileInput").files[0];
-    if(!file) return;
+    let rawLines = text.split("\n");
 
-    const reader = new FileReader();
+    let displayLines = rawLines
+        .map(l => l.trim())
+        .filter(l => l.length > 0);
 
-    reader.onload = function(e){
+    let lines = displayLines.map(l => l.replace(/-/g,""));
 
-        let rawLines = e.target.result.split("\n");
+    let outputDiv = document.getElementById("output");
+    outputDiv.innerHTML = "";
 
-        let displayLines = rawLines
-            .map(l => l.trim())
-            .filter(l => l.length > 0);
+    let highlightIndexes = new Set();
+    let resultAForLine = {};
 
-        let lines = displayLines.map(l => l.replace(/-/g,""));
+    for(let i=0; i < lines.length-2; i++){
 
-        let outputDiv = document.getElementById("output");
-        outputDiv.innerHTML = "";
+        let A = applyRule(lines[i], lines[i+1]);
 
-        let highlightIndexes = new Set();
-        let resultAForLine = {};
+        if(has4ConsecutiveDiff(A, lines[i+2])){
+            highlightIndexes.add(i);
+            highlightIndexes.add(i+1);
+            highlightIndexes.add(i+2);
 
-        for(let i=0; i < lines.length-2; i++){
+            resultAForLine[i+2] = A;
+        }
+    }
 
-            let A = applyRule(lines[i], lines[i+1]);
+    displayLines.forEach((line, index)=>{
 
-            if(has4ConsecutiveDiff(A, lines[i+2])){
-                highlightIndexes.add(i);
-                highlightIndexes.add(i+1);
-                highlightIndexes.add(i+2);
+        let div = document.createElement("div");
+        div.className = "line";
 
-                // CHỈ lưu A nếu thỏa điều kiện
-                resultAForLine[i+2] = A;
-            }
+        if(highlightIndexes.has(index)){
+            div.classList.add("highlight");
         }
 
-        displayLines.forEach((line, index)=>{
+        let textLine = line;
 
-            let div = document.createElement("div");
-            div.className = "line";
+        if(resultAForLine[index]){
+            let formattedA = resultAForLine[index].split("").join("-");
+            textLine += "   |   A = " + formattedA;
+        }
 
-            if(highlightIndexes.has(index)){
-                div.classList.add("highlight");
-            }
-
-            let text = line;
-
-            if(resultAForLine[index]){
-                let formattedA = resultAForLine[index].split("").join("-");
-                text += "   |   A = " + formattedA;
-            }
-
-            div.textContent = text;
-            outputDiv.appendChild(div);
-        });
-    };
-
-    reader.readAsText(file);
+        div.textContent = textLine;
+        outputDiv.appendChild(div);
+    });
 }
+
+function loadFromIPFS(){
+
+    document.getElementById("output").innerHTML = "Đang tải dữ liệu...";
+
+    fetch(ipfsURL)
+        .then(res => res.text())
+        .then(data => processText(data))
+        .catch(err => {
+            document.getElementById("output").innerHTML =
+                "<div style='color:red'>Không tải được dữ liệu từ IPFS</div>";
+        });
+}
+
+window.onload = loadFromIPFS;
 
 </script>
 
