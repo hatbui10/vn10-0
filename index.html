@@ -2,151 +2,186 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<title>STT & 0-1</title>
-
+<title>Kiểm tra 4 bit liên tiếp</title>
 <style>
-body {
-    font-family: Consolas, monospace;
-    background: #0f172a;
-    padding: 30px;
-    color: #e5e7eb;
+body{
+    background:#1e1e2f;
+    color:white;
+    font-family:Arial;
+    padding:20px;
 }
 
-.row {
-    display: grid;
-    grid-template-columns: repeat(25, 48px);
-    gap: 6px;
-    margin-bottom: 12px;
+.line{
+    padding:6px;
+    font-size:18px;
 }
 
-input {
-    width: 48px;
-    height: 40px;
-    text-align: center;
-    font-size: 16px;
-    border-radius: 6px;
-    border: none;
-    outline: none;
-    box-sizing: border-box;
-}
-
-.stt input {
-    background: #1e293b;
-    color: #38bdf8;
-    font-weight: bold;
-}
-
-.val input {
-    background: #020617;
-    color: #facc15;
-}
-
-input:disabled {
-    opacity: 0.6;
-}
-
-.sum {
-    margin-top: 10px;
-    font-size: 18px;
-    color: #a5f3fc;
+.highlight{
+    background:black;
+    color:#00ff99;
 }
 </style>
 </head>
 <body>
 
-<div class="row stt" id="sttRow"></div>
-<div class="row val" id="valRow"></div>
+<h2>Kiểm tra 4 bit liên tiếp khác nhau</h2>
 
-<div class="sum">
-    Tổng: <span id="sum">0</span>
-</div>
+<input type="file" id="fileInput" accept=".txt">
+<button onclick="processFile()">Xử lý</button>
+
+<div id="output"></div>
 
 <script>
-const COLS = 25;
-const sttInputs = [];
-const valInputs = [];
-let valCount = 0;
 
-/* Tạo ô */
-for (let i = 0; i < COLS; i++) {
-    const s = document.createElement("input");
-    s.maxLength = 3;
-    s.disabled = i !== COLS - 1;
-    document.getElementById("sttRow").appendChild(s);
-    sttInputs.push(s);
+const ruleMap = {
+    "1": [2,3,5],
+    "2": [2,5],
+    "3": [1,4],
+    "4": [1,2],
+    "5": [2,5],
 
-    const v = document.createElement("input");
-    v.maxLength = 1;
-    v.disabled = i !== COLS - 1;
-    document.getElementById("valRow").appendChild(v);
-    valInputs.push(v);
+    "1-2": [2,3],
+    "1-3": [1,3],
+    "1-4": [2,3],
+    "1-5": [3],
+    "2-3": [2,3,5],
+    "2-4": [3,5],
+    "2-5": [2,4],
+    "3-4": [2,4],
+    "3-5": [1,5],
+    "4-5": [2,5],
+
+    "1-2-3": [3,5],
+    "1-2-4": [3,5],
+    "1-2-5": [2,4],
+    "1-3-5": [2,4],
+    "1-3-4": [2,5],
+    "1-4-5": [2,4],
+    "2-4-5": [2,4,5],
+    "2-3-4": [1,5],
+    "2-3-5": [1,4],
+    "3-4-5": [1,2],
+
+    "1-2-3-4": [3],
+    "1-2-3-5": [2,5],
+    "1-2-4-5": [2,4,5],
+    "1-3-4-5": [3],
+    "2-3-4-5": [2,4,5],
+
+    "1-2-3-4-5": [3,5],
+    "": [2,5]
+
+};
+
+function flip(bit){
+    return bit === "0" ? "1" : "0";
 }
 
-/* Focus ban đầu */
-sttInputs[24].focus();
+function applyRule(base, test){
 
-/* ===== STT ===== */
-sttInputs[24].addEventListener("input", e => {
-    e.target.value = e.target.value.replace(/\D/g, "");
+    let baseBits = base.split("");
+    let testBits = test.split("");
 
-    if (e.target.value.length === 3) {
-        const base = parseInt(e.target.value, 10);
+    let diffPositions = [];
 
-        // ô 1 = base → ô 24 = base + 23
-        for (let i = 0; i < 24; i++) {
-            sttInputs[i].value = base + i;
+    for(let i=0;i<5;i++){
+        if(baseBits[i] !== testBits[i]){
+            diffPositions.push(i+1);
         }
-
-        sttInputs[24].value = "";
-
-        setTimeout(() => {
-            valInputs[24].focus();
-        }, 1000);
-    }
-});
-
-/* ===== 0–1 ===== */
-valInputs[24].addEventListener("input", e => {
-    if (!["0", "1"].includes(e.target.value)) {
-        e.target.value = "";
-        return;
     }
 
-    // dịch trái hàng dưới
-    for (let i = 0; i < 24; i++) {
-        valInputs[i].value = valInputs[i + 1].value;
-    }
-    valInputs[24].value = e.target.value;
-    e.target.value = "";
+    let key = diffPositions.sort((a,b)=>a-b).join("-");
 
-    valCount++;
-
-    updateSum(); // 👈 TÍNH TỔNG
-
-    // đủ 25 lần → STT dịch theo
-    if (valCount >= 25) {
-        for (let i = 0; i < 23; i++) {
-            sttInputs[i].value = sttInputs[i + 1].value;
-        }
-        sttInputs[23].value =
-            parseInt(sttInputs[22].value) + 1;
-
-        valCount = 0;
+    if(ruleMap[key]){
+        ruleMap[key].forEach(pos=>{
+            testBits[pos-1] = flip(testBits[pos-1]);
+        });
     }
 
-    valInputs[24].focus();
-});
-
-/* ===== TÍNH TỔNG 25 Ô 0–1 ===== */
-function updateSum() {
-    let sum = 0;
-    for (let i = 0; i < COLS; i++) {
-        if (valInputs[i].value === "1") sum++;
-    }
-    document.getElementById("sum").textContent = sum;
+    return testBits.join("");
 }
+
+function has4ConsecutiveDiff(a, b){
+
+    for(let start = 0; start <= 1; start++){
+
+        let ok = true;
+
+        for(let i = start; i < start + 4; i++){
+            if(a[i] === b[i]){
+                ok = false;
+                break;
+            }
+        }
+
+        if(ok) return true;
+    }
+
+    return false;
+}
+
+function processFile(){
+
+    const file = document.getElementById("fileInput").files[0];
+    if(!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = function(e){
+
+        let rawLines = e.target.result.split("\n");
+
+        let displayLines = rawLines
+            .map(l => l.trim())
+            .filter(l => l.length > 0);
+
+        let lines = displayLines.map(l => l.replace(/-/g,""));
+
+        let outputDiv = document.getElementById("output");
+        outputDiv.innerHTML = "";
+
+        let highlightIndexes = new Set();
+        let resultAForLine = {};
+
+        for(let i=0; i < lines.length-2; i++){
+
+            let A = applyRule(lines[i], lines[i+1]);
+
+            if(has4ConsecutiveDiff(A, lines[i+2])){
+                highlightIndexes.add(i);
+                highlightIndexes.add(i+1);
+                highlightIndexes.add(i+2);
+
+                // CHỈ lưu A nếu thỏa điều kiện
+                resultAForLine[i+2] = A;
+            }
+        }
+
+        displayLines.forEach((line, index)=>{
+
+            let div = document.createElement("div");
+            div.className = "line";
+
+            if(highlightIndexes.has(index)){
+                div.classList.add("highlight");
+            }
+
+            let text = line;
+
+            if(resultAForLine[index]){
+                let formattedA = resultAForLine[index].split("").join("-");
+                text += "   |   A = " + formattedA;
+            }
+
+            div.textContent = text;
+            outputDiv.appendChild(div);
+        });
+    };
+
+    reader.readAsText(file);
+}
+
 </script>
 
 </body>
 </html>
-
